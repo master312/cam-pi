@@ -1,0 +1,9 @@
+{
+  "name": "cam-pi",
+  "version": "0.0.1",
+  "author": "Sythinian https://github.com/master312",
+
+  "dependencies": {
+    "node-media-server": "^2.6.2"
+  }
+}
