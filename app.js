@@ -1,18 +1,20 @@
-const NodeMediaServer = require('node-media-server');
+const express = require('express');
+const path = require('path');
+const http = require('http');
+const hostRouter = require('./host_info');
+const streamRouter = require('./stream_ops');
 
-const config = {
-  rtmp: {
-    port: 1935,
-    chunk_size: 1000,
-    gop_cache: false,
-    ping: 30,
-    ping_timeout: 60
-  },
-  http: {
-    port: 8000,
-    allow_origin: '*'
-  }
-};
+const port = 1000
 
-var nms = new NodeMediaServer(config)
-nms.run();
+const app = express();
+const server = http.createServer(app);
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/host', hostRouter);
+
+app.use('/stream', streamRouter);
+
+server.listen(port, function () {
+    console.log('App listening on port ' + port);
+});

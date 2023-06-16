@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F5F5F5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #devices {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .devices_class {
+            background-color: #FFF;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .details {
+            margin-top: 10px;
+            display: none;
+        }
+
+        #screenshot {
+            display: block;
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+        }
+    </style>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script>
+        // const socket = io();
+        // socket.on('screenshot', (data) => {
+        //     const img = document.getElementById('screenshot');
+        //     img.src = data;
+        // });
+
+        // function getScreenshot(device) {
+        //     socket.emit('getScreenshot', device);
+        // }
+
+        function loadHostInfo() {
+            fetch('/host/info')
+                .then(response => response.json())
+                .then(info => {
+                    const hostInfoDiv = document.getElementById('host-info');
+                    hostInfoDiv.innerHTML = `
+                        <div><strong>Hostname:</strong> ${info.hostname}</div>
+                        <div><strong>IP Addresses:</strong> ${info.ipAddresses.join(', ')}</div>
+                        <div><strong>Memory:</strong> Free: ${info.memory.free} MB, Used: ${info.memory.used} MB, Total: ${info.memory.total} MB</div>
+                        <div><strong>CPU Usage:</strong> ${info.cpuUsage} %</div>
+                        <div><strong>Disk:</strong> Total: ${info.disk ? info.disk.total : 'Unknown'} GB, Free: ${info.disk ? info.disk.free : 'Unknown'} GB</div>
+                    `;
+                });
+        }
+        
+        function toggleDetails(device) {
+            const details = document.getElementById(`details-${device}`);
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function loadDevices() {
+            fetch('/stream/devices')
+                .then(response => response.json())
+                .then(devices => {
+                    const list = document.getElementById('devices');
+                    list.innerHTML = '';
+                    devices.forEach(device => {
+                        const listItem = document.createElement('li');
+                        
+                        const deviceButton = document.createElement('li');
+                        deviceButton.className = "devices_class"
+                        deviceButton.textContent = device;
+                        deviceButton.onclick = () => toggleDetails(device);
+                        listItem.appendChild(deviceButton);
+                        
+                        const details = document.createElement('div');
+                        details.id = `details-${device}`;
+                        details.className = 'devices_class';
+                        details.style.display = 'block';
+                        details.innerHTML = `
+                            <div>
+                                <label>State: Offline </label>
+                            </div>
+                            <div>
+                                <label>Stream name:</label>
+                                <input type="text" value="[stream link for ${device}]"/>
+                            </div>
+                            <div>
+                                <label>ffmpeg args:</label>
+                                <input type="text" value="[ffmpeg args for ${device}]"/>
+                            </div>
+                            <div>
+                                <label>Max resolution:</label>
+                                <input type="text" value="[max resolution for ${device}]"/>
+                            </div>
+                            <button onclick="toggleStream('${device}')">Start/Stop Stream</button>
+                        `;
+
+
+                        deviceButton.appendChild(details);
+
+                        list.appendChild(listItem);
+                    });
+                });
+        }
+
+        function toggleStream(device) {
+            // Replace this with the actual function to start/stop the stream for a device
+            console.log(`Toggle stream for device ${device}`);
+        }
+
+        window.onload = () => {
+            loadDevices();
+            loadHostInfo();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Host info:</h2>
+        <div id="host-info" class="devices_class" >TODO: Insert host info</div>
+        <h2>Available Video Devices:</h2>
+        <ul id="devices"></ul>
+    </div>
+</body>
+</html>
