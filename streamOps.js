@@ -106,6 +106,7 @@ router.get('/toggle/:streamName', async (req, res) => {
 
     if (result.streaming) {
         // The stream is currently active, so we'll stop it.
+        // TODO: This is broken. .kill dose not work for some reason....
         result.childProcess.kill(1);
         result.childProcess = null;
         result.streaming = false;
