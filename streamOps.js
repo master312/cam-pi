@@ -114,6 +114,8 @@ router.get('/toggle/:streamName', async (req, res) => {
     }
 
     // The stream is currently not active, so we'll start it.
+    console.log("STARTING STREAM -- CMD: " + result.ffmpegCmd);
+    
     const child = exec(result.ffmpegCmd);
     result.childProcess = child;
     result.streaming = true;
