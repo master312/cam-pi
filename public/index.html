@@ -130,9 +130,21 @@
                 });
         }
 
-        function toggleStream(device) {
-            // Replace this with the actual function to start/stop the stream for a device
-            console.log(`Toggle stream for device ${device}`);
+        async function toggleStream(device) {
+            try {
+                const response = await fetch(`/stream/toggle/${device}`);
+                
+                // If the request was unsuccessful, throw an error
+                if (!response.ok) {
+                    throw new Error(`Server responded with a status of ${response.status}`);
+                }
+                
+                const data = await response.json();
+                alert(data.status);
+            } catch (error) {
+                console.error(`Failed to toggle stream for device ${device}: `, error);
+                alert('Failed to toggle stream. Please check console for more details.');
+            }
         }
 
         window.onload = () => {

@@ -12,7 +12,9 @@ const ffmpegDefaultArgs = '-c:v h264_v4l2m2m -b:v 4M -pix_fmt yuv420p'
 // REMAINDER: Always keep '/' on the end of this path!
 const ffmpegRtmpRoot = 'rtmp://localhost:1935/live/'
 
-activeStreams = []
+// Keeps track of all devices
+// replace with sqlite
+videoDevices = []
 
 
 // Device model example:
@@ -22,6 +24,8 @@ activeStreams = []
 //     streamName = 'device1'
 //     ffmpegArgs = '-c:v h264_v4l2m2m -b:v 5M -pix_fmt yuv420p'
 //     maxRes = '1280x768'
+//     streaming = true || false
+//     childProcess = exec(ffmpeg command here) || null
 //     // streamCmd = 'ffmpeg -re -i /dev/video0 -c:v h264_v4l2m2m -b:v 5M -pix_fmt yuv420p -f flv rtmp://192.168.1.135:1935/live/{streamName}'
 // }
 
@@ -49,8 +53,7 @@ function extractVideoDevices(deviceString) {
     return matches;
 }
 
-// Returns all camera devices connected to the machine
-router.get('/devices', async (req, res) => {
+function pullDevices() {
     exec('v4l2-ctl --list-devices', (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
@@ -81,10 +84,55 @@ router.get('/devices', async (req, res) => {
             videoDevices.push(generateDeviceInfo(element));
         });
 
+        console.log('Pulled devices: \n');
         console.log(videoDevices);
-        return res.json(videoDevices);
     });
+}
+
+// Returns all camera devices connected to the machine
+router.get('/devices', async (req, res) => {
+    return res.json(videoDevices);
 });
 
+router.get('/toggle/:streamName', async (req, res) => {
+    const deviceStreamName = req.params.streamName;
 
+    let result = videoDevices.find(item => item.streamName === deviceStreamName);
+
+    if (result == null) {
+        res.json({ status: "Device not found" });
+        return;
+    }
+
+    if (result.streaming) {
+        // The stream is currently active, so we'll stop it.
+        result.childProcess.kill();
+        result.childProcess = null;
+        result.streaming = false;
+        res.json({ status: "Stream stopped" });
+        return
+    }
+
+    // The stream is currently not active, so we'll start it.
+    const child = exec(result.ffmpegCmd);
+    result.childProcess = child;
+    result.streaming = true;
+    let errorOccurred = false;
+
+    child.on('error', (error) => {
+        console.error(`Failed to start stream for device ${deviceStreamName}: `, error);
+        errorOccurred = true;
+        result.streaming = false; // reset streaming status
+    });
+
+    setTimeout(() => {
+        if (!errorOccurred) {
+            res.json({ status: "Stream started" });
+        } else {
+            res.json({ status: "Failed to start stream" });
+        }
+    }, 6000); // wait for 6 seconds
+});
+
+pullDevices();
 module.exports = router;
