@@ -14,7 +14,7 @@ const ffmpegRtmpRoot = 'rtmp://localhost:1935/live/'
 
 // Keeps track of all devices
 // replace with sqlite
-videoDevices = []
+streamDevices = []
 
 
 // Device model example:
@@ -78,26 +78,26 @@ function pullDevices() {
             }
         });
         
-        videoDevices = []
+        streamDevices = []
         extractedPaths.forEach(element => {
 
-            videoDevices.push(generateDeviceInfo(element));
+            streamDevices.push(generateDeviceInfo(element));
         });
 
         console.log('Pulled devices: \n');
-        console.log(videoDevices);
+        console.log(streamDevices);
     });
 }
 
 // Returns all camera devices connected to the machine
 router.get('/devices', async (req, res) => {
-    return res.json(videoDevices);
+    return res.json(streamDevices);
 });
 
 router.get('/toggle/:streamName', async (req, res) => {
     const deviceStreamName = req.params.streamName;
 
-    let result = videoDevices.find(item => item.streamName === deviceStreamName);
+    let result = streamDevices.find(item => item.streamName === deviceStreamName);
 
     if (result == null) {
         res.json({ status: "Device not found" });
@@ -106,7 +106,7 @@ router.get('/toggle/:streamName', async (req, res) => {
 
     if (result.streaming) {
         // The stream is currently active, so we'll stop it.
-        result.childProcess.kill();
+        result.childProcess.kill(1);
         result.childProcess = null;
         result.streaming = false;
         res.json({ status: "Stream stopped" });
@@ -115,7 +115,7 @@ router.get('/toggle/:streamName', async (req, res) => {
 
     // The stream is currently not active, so we'll start it.
     console.log("STARTING STREAM -- CMD: " + result.ffmpegCmd);
-    
+
     const child = exec(result.ffmpegCmd);
     result.childProcess = child;
     result.streaming = true;
@@ -134,6 +134,20 @@ router.get('/toggle/:streamName', async (req, res) => {
             res.json({ status: "Failed to start stream" });
         }
     }, 6000); // wait for 6 seconds
+});
+
+router.get('/status/:streamName', async (req, res) => {
+    const deviceStreamName = req.params.streamName;
+
+    let device = streamDevices.find(item => item.streamName === deviceStreamName);
+
+    if (device == null) {
+        res.json({ status: "Device not found" });
+        return;
+    }
+
+    // Return the current streaming status of the device
+    res.json({ status: device.streaming ? "Streaming" : "Not streaming" });
 });
 
 pullDevices();
