@@ -50,18 +50,58 @@
             overflow-y: auto;
             max-height: 200px; /* adjust the height as per requirement */
         }
-    </style>
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
-    <script>
-        // const socket = io();
-        // socket.on('screenshot', (data) => {
-        //     const img = document.getElementById('screenshot');
-        //     img.src = data;
-        // });
 
-        // function getScreenshot(device) {
-        //     socket.emit('getScreenshot', device);
-        // }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s linear 0.3s, opacity 0.3s;
+        }
+
+        .overlay.visible {
+            visibility: visible;
+            opacity: 1;
+            transition-delay: 0s;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #FFF;
+            border-top-color: transparent;
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+    </style>
+    <script>
+        function showOverlay() {
+            const overlay = document.getElementById('overlay');
+            overlay.classList.add('visible');
+        }
+
+        function hideOverlay() {
+            const overlay = document.getElementById('overlay');
+            overlay.classList.remove('visible');
+        }
 
         function loadHostInfo() {
             fetch('/host/info')
@@ -132,20 +172,25 @@
 
         async function toggleStream(device) {
             try {
+                showOverlay(); // Show loading overlay
+
                 const response = await fetch(`/stream/toggle/${device}`);
-                
+
                 // If the request was unsuccessful, throw an error
                 if (!response.ok) {
                     throw new Error(`Server responded with a status of ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 alert(data.status);
             } catch (error) {
                 console.error(`Failed to toggle stream for device ${device}: `, error);
                 alert('Failed to toggle stream. Please check console for more details.');
+            } finally {
+                hideOverlay(); // Hide loading overlay regardless of success or failure
             }
         }
+
 
         window.onload = () => {
             loadDevices();
@@ -160,6 +205,11 @@
         <h2>Available Video Devices:</h2>
         <div class="scrollable">
             <ul id="devices"></ul>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="overlay" class="overlay">
+            <div class="spinner"></div>
         </div>
     </div>
 </body>
