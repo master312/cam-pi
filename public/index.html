@@ -16,6 +16,7 @@
         #devices {
             list-style-type: none;
             padding: 0;
+            height: 200px; /* or any height you want */
         }
 
         .devices_class {
@@ -43,6 +44,11 @@
         .container {
             text-align: center;
             max-width: 600px;
+        }
+        
+        .scrollable {
+            overflow-y: auto;
+            max-height: 200px; /* adjust the height as per requirement */
         }
     </style>
     <!-- <script src="/socket.io/socket.io.js"></script> -->
@@ -72,8 +78,8 @@
                 });
         }
         
-        function toggleDetails(device) {
-            const details = document.getElementById(`details-${device}`);
+        function toggleDetails(deviceStreamname) {
+            const details = document.getElementById(`details-${deviceStreamname}`);
             details.style.display = details.style.display === 'none' ? 'block' : 'none';
         }
 
@@ -87,13 +93,13 @@
                         const listItem = document.createElement('li');
                         
                         const deviceButton = document.createElement('li');
-                        deviceButton.className = "devices_class"
-                        deviceButton.textContent = device;
-                        deviceButton.onclick = () => toggleDetails(device);
+                        deviceButton.className = 'devices_class'
+                        deviceButton.textContent = device.name + ' - ' + device.streamName;
+                        deviceButton.onclick = () => toggleDetails(device.streamName);
                         listItem.appendChild(deviceButton);
                         
                         const details = document.createElement('div');
-                        details.id = `details-${device}`;
+                        details.id = `details-${device.streamName}`;
                         details.className = 'devices_class';
                         details.style.display = 'block';
                         details.innerHTML = `
@@ -102,17 +108,17 @@
                             </div>
                             <div>
                                 <label>Stream name:</label>
-                                <input type="text" value="[stream link for ${device}]"/>
+                                <input type="text" disabled value="${device.streamName}]"/>
                             </div>
                             <div>
                                 <label>ffmpeg args:</label>
-                                <input type="text" value="[ffmpeg args for ${device}]"/>
+                                <input type="text" disabled value="${device.ffmpegArgs}]"/>
                             </div>
                             <div>
                                 <label>Max resolution:</label>
-                                <input type="text" value="[max resolution for ${device}]"/>
+                                <input type="text" disabled value="${device.maxRes}"/>
                             </div>
-                            <button onclick="toggleStream('${device}')">Start/Stop Stream</button>
+                            <button onclick="toggleStream('${device.streamName}')">Start/Stop Stream</button>
                         `;
 
 
@@ -139,7 +145,9 @@
         <h2>Host info:</h2>
         <div id="host-info" class="devices_class" >TODO: Insert host info</div>
         <h2>Available Video Devices:</h2>
-        <ul id="devices"></ul>
+        <div class="scrollable">
+            <ul id="devices"></ul>
+        </div>
     </div>
 </body>
 </html>
