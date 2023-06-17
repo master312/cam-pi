@@ -21,6 +21,7 @@ streamDevices = []
 // {
 //     name = 'Nikon USB CAM'
 //     path = '/dev/video0'
+//     // This should be unique key
 //     streamName = 'device1'
 //     ffmpegArgs = '-c:v h264_v4l2m2m -b:v 5M -pix_fmt yuv420p'
 //     maxRes = '1280x768'
