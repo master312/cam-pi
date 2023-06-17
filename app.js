@@ -1,10 +1,13 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-const hostRouter = require('./host_info');
-const streamRouter = require('./stream_ops');
+const hostRouter = require('./hostInfo');
+const streamRouter = require('./streamOps');
 
-const port = 1000
+const { startServer, getServerStatus } = require('./mediaServer');
+const mediaConfig = require('./mediaConfig')
+
+const port = 3000
 
 const app = express();
 const server = http.createServer(app);
@@ -15,6 +18,12 @@ app.use('/host', hostRouter);
 
 app.use('/stream', streamRouter);
 
+app.get('/server-status', (req, res) => {
+    return res.json(getServerStatus());
+});
+
+startServer(mediaConfig);
+
 server.listen(port, function () {
-    console.log('App listening on port ' + port);
+    console.log('Express listening on port ' + port);
 });

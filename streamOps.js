@@ -7,7 +7,7 @@ const router = express.Router();
 // Devices to be ignored when retreiving list of available devices using v4l2-ctl
 const ignoredDevices = ['bcm2835-codec-decode', 'bcm2835-isp', 'rpivid'];
 
-const ffmpegDefaultArgs = '-c:v h264_v4l2m2m -b:v 5M -pix_fmt yuv420p'
+const ffmpegDefaultArgs = '-c:v h264_v4l2m2m -b:v 4M -pix_fmt yuv420p'
 
 // REMAINDER: Always keep '/' on the end of this path!
 const ffmpegRtmpRoot = 'rtmp://localhost:1935/live/'
