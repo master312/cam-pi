@@ -96,7 +96,7 @@
                         const deviceButton = document.createElement('li');
                         deviceButton.className = 'devices_class'
                         deviceButton.textContent = device.name + ' - ' + device.streamName;
-                        deviceButton.onclick = () => toggleDetails(device.streamName);
+                        // deviceButton.onclick = () => toggleDetails(device.streamName);
                         listItem.appendChild(deviceButton);
                         
                         const details = document.createElement('div');
@@ -105,7 +105,7 @@
                         details.style.display = 'block';
                         details.innerHTML = `
                             <div>
-                                <label>State: ${device.streaming} </label>
+                                <label>Streaming: ${device.streaming} </label>
                             </div>
                             <div>
                                 <label>Stream name:</label>
